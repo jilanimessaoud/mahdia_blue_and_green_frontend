@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { authService } from '../services';
+import { getApiBaseUrl } from '../services/api';
 
 export default function AuthCallback() {
   const [searchParams] = useSearchParams();
@@ -46,7 +47,7 @@ export default function AuthCallback() {
     }
 
     if (token) {
-      fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/auth/me`, {
+      fetch(`${getApiBaseUrl()}/auth/me`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }

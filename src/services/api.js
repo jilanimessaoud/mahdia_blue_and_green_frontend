@@ -2,6 +2,23 @@
 // - Development: même origine /api (proxy Vite) si VITE_API_URL vide.
 // - Production Vercel « tout-en-un »: VITE_SAMEDOMAIN_API=true → même origine /api (Express Vercel).
 // - Sinon: VITE_API_URL absolue (https://…) vers un backend hors Vercel.
+//
+/** Express monte tout sous /api. Si l’env ne contient que l’origine (ex. https://service.onrender.com), on ajoute /api. */
+export function normalizeAbsoluteApiBase(url) {
+  const trimmed = String(url).trim().replace(/\/$/, '');
+  if (!trimmed || !/^https?:\/\//i.test(trimmed)) return trimmed;
+  try {
+    const u = new URL(trimmed);
+    const path = (u.pathname || '/').replace(/\/$/, '') || '';
+    if (path === '' || path === '/') {
+      return `${u.origin}/api`;
+    }
+    return trimmed;
+  } catch {
+    return trimmed;
+  }
+}
+
 export const getApiBaseUrl = () => {
   if (import.meta.env.VITE_SAMEDOMAIN_API === 'true') {
     if (typeof window !== 'undefined' && window.location?.origin) {
@@ -40,7 +57,7 @@ export const getApiBaseUrl = () => {
         );
       }
     }
-    return base;
+    return normalizeAbsoluteApiBase(base);
   }
 
   if (import.meta.env.DEV && typeof window !== 'undefined' && window.location?.origin) {

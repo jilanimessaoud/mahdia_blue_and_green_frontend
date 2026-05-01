@@ -1,4 +1,4 @@
-import api, { getApiBaseUrl } from './api';
+import api, { getApiBaseUrl, normalizeAbsoluteApiBase } from './api';
 
 /**
  * Origine du backend pour l’OAuth uniquement (navigation pleine page).
@@ -24,7 +24,7 @@ function getOAuthBackendOrigin() {
     apiUrl = '';
   }
   if (!apiUrl) {
-    apiUrl = (import.meta.env.VITE_API_URL || '').trim();
+    apiUrl = normalizeAbsoluteApiBase(import.meta.env.VITE_API_URL || '');
   }
 
   if (apiUrl.startsWith('http://') || apiUrl.startsWith('https://')) {
