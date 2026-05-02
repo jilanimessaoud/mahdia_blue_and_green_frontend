@@ -18,6 +18,41 @@ export default function VerifyEmail() {
         if (!email) navigate('/auth');
     }, [email, navigate]);
 
+    /** Après inscription sans e-mail partant : une tentative d’envoi auto (sessionStorage évite le double envoi en React Strict Mode). */
+    useEffect(() => {
+        if (!email || !location.state?.autoSendVerification) return;
+        const dedupeKey = `mbg_verify_autosent_${encodeURIComponent(email)}`;
+        if (sessionStorage.getItem(dedupeKey)) {
+            navigate(location.pathname, { replace: true, state: { email } });
+            return;
+        }
+        sessionStorage.setItem(dedupeKey, '1');
+
+        (async () => {
+            setResending(true);
+            try {
+                await authService.sendVerificationEmail(email);
+                setToast({
+                    show: true,
+                    message: 'Code envoyé. Vérifiez votre boîte mail et les courriers indésirables.',
+                    type: 'success',
+                });
+            } catch (err) {
+                setToast({
+                    show: true,
+                    message: err.message || 'Envoi impossible. Utilisez « Renvoyer le code » ou vérifiez la configuration du serveur.',
+                    type: 'error',
+                });
+                sessionStorage.removeItem(dedupeKey);
+            } finally {
+                setResending(false);
+                setTimeout(() => setToast({ show: false, message: '', type: 'success' }), 5000);
+            }
+        })();
+
+        navigate(location.pathname, { replace: true, state: { email } });
+    }, [email, location.pathname, location.state?.autoSendVerification, navigate]);
+
     const showToast = (message, type = 'error') => {
         setToast({ show: true, message, type });
         setTimeout(() => setToast({ show: false, message: '', type: 'success' }), 4000);

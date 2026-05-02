@@ -680,7 +680,12 @@ export default function Auth() {
                     type: sent ? 'success' : 'info',
                 });
                 setTimeout(() => {
-                    navigate('/verifier-email', { state: { email: userData.email } });
+                    navigate('/verifier-email', {
+                        state: {
+                            email: userData.email,
+                            autoSendVerification: response.verificationEmailSent === false,
+                        },
+                    });
                 }, 1000);
             }
         } catch (error) {
