@@ -79,10 +79,11 @@ const getToken = () => {
   if (user) {
     try {
       const parsed = JSON.parse(user);
-      console.log('Getting token from localStorage:', parsed);
-      // Token could be at different paths depending on response structure
       const token = parsed.token || parsed.data?.token;
-      console.log('Extracted token:', token ? 'Token found' : 'No token found');
+      if (!token) {
+        localStorage.removeItem('mbg_user');
+        return null;
+      }
       return token;
     } catch (err) {
       console.error('Error parsing user data:', err);

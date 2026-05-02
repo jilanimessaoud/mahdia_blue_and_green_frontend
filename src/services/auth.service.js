@@ -8,14 +8,13 @@ export const authService = {
   register: async (userData) => {
     const response = await api.post('/auth/register', userData, { skipAuth: true });
     if (response.success) {
-      // Store temp token for questionnaire completion
       if (response.tempToken) {
         localStorage.setItem(TEMP_STORAGE_KEY, JSON.stringify(response));
-      } else {
-        // Store the complete user data with token at root level
+      } else if (response.token) {
+        // Ne pas écrire mbg_user sans JWT (ex. inscription → vérif. email seulement) sinon /auth/me renvoie 401
         const userDataToStore = {
           token: response.token,
-          ...response.data
+          ...response.data,
         };
         localStorage.setItem(STORAGE_KEY, JSON.stringify(userDataToStore));
       }
