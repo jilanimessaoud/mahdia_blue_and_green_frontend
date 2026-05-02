@@ -671,8 +671,14 @@ export default function Auth() {
 
             if (response.success) {
                 setRegistrationData(response);
-                // Always redirect to email verification first
-                setToast({ show: true, message: 'Compte créé ! Vérifiez votre email.', type: 'success' });
+                const sent = response.verificationEmailSent !== false;
+                setToast({
+                    show: true,
+                    message: sent
+                        ? 'Compte créé ! Vérifiez votre email.'
+                        : (response.message || 'Compte créé. Utilisez « Renvoyer le code » si vous ne recevez pas l’email.'),
+                    type: sent ? 'success' : 'info',
+                });
                 setTimeout(() => {
                     navigate('/verifier-email', { state: { email: userData.email } });
                 }, 1000);
